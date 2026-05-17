@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9146FF"/>
+      <stop offset="1" stop-color="#7289DA"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <!-- Calendar binding rings -->
+  <rect x="20" y="8" width="6" height="19" rx="3" fill="white" fill-opacity="0.92"/>
+  <rect x="38" y="8" width="6" height="19" rx="3" fill="white" fill-opacity="0.92"/>
+  <!-- Calendar body -->
+  <rect x="9" y="18" width="46" height="38" rx="6" fill="white" fill-opacity="0.93"/>
+  <!-- Calendar header band (rounded top + fill overlap for flat bottom) -->
+  <rect x="9" y="18" width="46" height="13" rx="6" fill="#9146FF" fill-opacity="0.2"/>
+  <rect x="9" y="25" width="46" height="6" fill="#9146FF" fill-opacity="0.2"/>
+  <!-- Header divider -->
+  <line x1="9" y1="31" x2="55" y2="31" stroke="#9146FF" stroke-opacity="0.15" stroke-width="1.5"/>
+  <!-- Play triangle (stream icon) -->
+  <path d="M24 36L24 50L44 43Z" fill="#7c3aed" fill-opacity="0.82"/>
+</svg>

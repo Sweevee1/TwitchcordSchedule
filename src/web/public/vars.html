@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Template Variables — TwitchcordSchedule</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .docs-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 40px 28px 80px;
+    }
+
+    .docs-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 32px;
+      transition: color 0.12s;
+    }
+    .docs-back:hover { color: var(--text); text-decoration: none; }
+    .docs-back-arrow { font-size: 16px; line-height: 1; }
+
+    .docs-header { margin-bottom: 36px; }
+
+    .docs-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .docs-brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--twitch-brand) 0%, var(--accent) 100%);
+      flex-shrink: 0;
+    }
+
+    .docs-brand-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .docs-brand-text span { color: var(--twitch-brand); }
+
+    .docs-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .docs-lead {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 600px;
+    }
+
+    .docs-section { margin-top: 40px; }
+
+    .docs-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+
+    .var-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+
+    .var-table thead {
+      background: var(--elevated);
+    }
+
+    .var-table thead th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+    }
+
+    .var-table tbody tr {
+      background: var(--card-bg);
+      border-top: 1px solid var(--card-border);
+      transition: background 0.1s;
+    }
+
+    .var-table tbody tr:hover { background: var(--elevated); }
+
+    .var-table td {
+      padding: 12px 16px;
+      vertical-align: top;
+    }
+
+    .var-name {
+      font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+      font-size: 13px;
+      color: #e3b341;
+      white-space: nowrap;
+    }
+
+    .var-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .var-desc small {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .var-example {
+      font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .availability {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .avail-pill {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 2px 7px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    .avail-title {
+      background: var(--accent-soft);
+      color: #d8def7;
+    }
+
+    .avail-desc {
+      background: rgba(59, 165, 93, 0.16);
+      color: #6ddb8a;
+    }
+
+    .example-block {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .example-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .example-row:last-child { border-bottom: none; }
+
+    .example-label {
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      background: var(--elevated);
+      display: flex;
+      align-items: flex-start;
+      padding-top: 14px;
+    }
+
+    .example-val {
+      padding: 12px 16px;
+      font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .example-template { color: var(--text-muted); }
+    .example-result   { color: var(--success); }
+
+    .example-arrow {
+      text-align: center;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: var(--text-dim);
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .note-block {
+      margin-top: 28px;
+      background: rgba(var(--accent-rgb), 0.1);
+      border: 1px solid rgba(var(--accent-rgb), 0.28);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .note-block strong { color: var(--text); }
+  </style>
+</head>
+<body style="background:var(--main-bg)">
+
+<div class="docs-wrap">
+  <a href="/" class="docs-back">
+    <span class="docs-back-arrow">←</span>
+    Back to dashboard
+  </a>
+
+  <div class="docs-header">
+    <div class="docs-brand">
+      <div class="docs-brand-icon"></div>
+      <div class="docs-brand-text"><span>Twitch</span>cordSchedule</div>
+    </div>
+    <h1 class="docs-title">Template Variables</h1>
+    <p class="docs-lead">
+      Use variables in your event title and description templates to automatically fill in live details from the Twitch schedule. Variables are written as <code>{variable_name}</code> and replaced at sync time.
+    </p>
+  </div>
+
+  <div class="docs-section">
+    <div class="docs-section-title">Available variables</div>
+    <table class="var-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Available in</th>
+          <th>Example value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="var-name">{title}</span></td>
+          <td>
+            <span class="var-desc">
+              The scheduled stream title set by the broadcaster on Twitch.
+              <small>Falls back to an empty string if not set.</small>
+            </span>
+          </td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-title">Title</span>
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">Ranked Games</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-name">{category}</span></td>
+          <td>
+            <span class="var-desc">
+              The game or category the stream is scheduled under.
+              <small>Empty string if no category is set for the segment.</small>
+            </span>
+          </td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-title">Title</span>
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">Valorant</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-name">{broadcaster}</span></td>
+          <td>
+            <span class="var-desc">
+              The broadcaster's display name as it appears on their Twitch channel.
+            </span>
+          </td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-title">Title</span>
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">Sweevee</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="docs-section">
+    <div class="docs-section-title">Example</div>
+    <div class="example-block">
+      <div class="example-row">
+        <div class="example-label">Title template</div>
+        <div class="example-val example-template">{broadcaster} — {title}</div>
+      </div>
+      <div class="example-row">
+        <div class="example-label">Description template</div>
+        <div class="example-val example-template">Tune in for some {category}! Follow at twitch.tv/{broadcaster}</div>
+      </div>
+      <div class="example-arrow">↓ after sync</div>
+      <div class="example-row">
+        <div class="example-label">Event title</div>
+        <div class="example-val example-result">Sweevee — Ranked Games</div>
+      </div>
+      <div class="example-row">
+        <div class="example-label">Event description</div>
+        <div class="example-val example-result">Tune in for some Valorant! Follow at twitch.tv/Sweevee</div>
+      </div>
+    </div>
+
+    <div class="note-block">
+      <strong>Unknown variables</strong> — any <code>{variable}</code> that doesn't match a known name is replaced with an empty string. Capitalisation matters: <code>{Title}</code> will not match <code>{title}</code>.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

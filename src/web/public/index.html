@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TwitchcordSchedule</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/favicon.svg" class="brand-icon" width="32" height="32" alt="" aria-hidden="true">
+      <span class="brand-text"><span class="brand-twitch">Twitch</span>cord<span class="brand-muted">Schedule</span></span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Primary">
+      <button type="button" class="nav-item active" data-tab="overview" id="nav-overview">
+        <span class="nav-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 9.5L10 3L17 9.5V17H13V12.5H7V17H3V9.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </span>
+        Overview
+      </button>
+      <button type="button" class="nav-item" data-tab="schedule" id="nav-schedule">
+        <span class="nav-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2.75" y="4.75" width="14.5" height="13.5" rx="2.25" stroke="currentColor" stroke-width="1.6"/><line x1="2.75" y1="9" x2="17.25" y2="9" stroke="currentColor" stroke-width="1.6"/><line x1="7" y1="2.5" x2="7" y2="6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="13" y1="2.5" x2="13" y2="6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        Schedule
+      </button>
+      <button type="button" class="nav-item" data-tab="logs" id="nav-logs">
+        <span class="nav-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><line x1="3" y1="5.5" x2="17" y2="5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="3" y1="10" x2="17" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="3" y1="14.5" x2="17" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        Activity
+      </button>
+    </nav>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Your servers</div>
+      <div class="sidebar-ch-row" id="sidebar-ch-row" style="display:none">
+        <span class="sidebar-for-label">For</span>
+        <img id="sidebar-ch-avatar" class="sidebar-ch-avatar" src="" alt="" style="display:none" onerror="this.style.display='none'">
+        <select id="sidebar-channel-selector" class="channel-selector-select sidebar-ch-select"></select>
+      </div>
+      <div class="cg-list" id="cg-list">
+        <div class="empty-state sidebar-empty">No channels configured</div>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-sidebar-add" id="btn-invite">+ Add bot to a server</button>
+  </aside>
+
+  <div class="main">
+    <header class="main-header">
+      <div class="main-header-left">
+        <div class="main-header-text">
+          <h1 class="main-title" id="main-title">Dashboard</h1>
+          <div class="main-header-badges"></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-scroll">
+      <div id="error-banner" class="error-banner"></div>
+
+      <section id="panel-overview" class="tab-panel active" role="tabpanel" aria-labelledby="tab-overview">
+        <div class="top-cards">
+          <div class="card card-compact">
+            <h2 class="card-h2">Sync</h2>
+            <p class="card-lead">Twitch is the source of truth. Scheduled segments are pushed to enabled Discord servers on a timer.</p>
+            <button type="button" class="btn btn-primary" id="btn-sync" disabled>Sync now</button>
+          </div>
+          <div class="card card-compact">
+            <h2 class="card-h2">Timing</h2>
+            <div class="stat-pair">
+              <div>
+                <div class="stat-label">Last sync</div>
+                <div class="stat-value" id="last-sync">Never</div>
+              </div>
+              <div>
+                <div class="stat-label">Next sync</div>
+                <div class="stat-value" id="next-sync">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="channel-list-header">
+            <h2 class="card-h2">Twitch channels</h2>
+            <span id="twitch-status" class="pill disconnected">Not connected</span>
+          </div>
+          <div id="channel-list"></div>
+          <div class="connect-row" style="margin-top:16px">
+            <div class="outline-field grow">
+              <input id="channel-input" class="outline-input" type="text" placeholder=" " autocomplete="off">
+              <label class="outline-label" for="channel-input">Add Twitch username</label>
+            </div>
+            <button type="button" class="btn btn-primary" id="btn-set-channel">Add</button>
+          </div>
+          <div id="sync-badge" class="pill syncing" style="display:none;margin-top:10px">Syncing…</div>
+        </div>
+      </section>
+
+      <section id="panel-schedule" class="tab-panel" role="tabpanel" aria-labelledby="tab-schedule" hidden>
+        <div class="card card-compact" style="margin-bottom:16px">
+          <h2 class="card-h2">Usage</h2>
+          <div class="usage-line">
+            <span class="usage-label">Enabled servers</span>
+            <span class="usage-value" id="usage-guilds">0 / 0</span>
+          </div>
+          <div class="usage-bar" aria-hidden="true"><div class="usage-bar-fill" id="usage-bar-fill" style="width:0%"></div></div>
+        </div>
+
+        <div class="card card-form" id="channel-config-card">
+          <div id="schedule-empty" class="empty-state" style="padding:12px 0">
+            Add a Twitch channel from the Overview tab to configure templates.
+          </div>
+          <div id="schedule-form" style="display:none">
+            <div class="form-section">
+              <h3 class="form-section-title">Streamer</h3>
+              <div class="streamer-select-row">
+                <img id="schedule-ch-avatar" class="streamer-select-avatar" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                <div class="outline-field select-field streamer-select-field">
+                  <select id="channel-selector" class="outline-input outline-select"></select>
+                  <label class="outline-label" for="channel-selector">Channel</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section-divider" aria-hidden="true"></div>
+
+            <div class="form-section">
+              <h3 class="form-section-title">Discord server</h3>
+              <div class="outline-field select-field">
+                <select id="guild-selector" class="outline-input outline-select"></select>
+                <label class="outline-label" for="guild-selector">Server</label>
+              </div>
+            </div>
+
+            <div class="form-section-divider" aria-hidden="true"></div>
+
+            <div id="schedule-no-guild" class="empty-state" style="display:none; padding:12px 0">
+              No servers are linked to this channel. Link one from the sidebar.
+            </div>
+
+            <div id="schedule-fields">
+              <div class="form-section">
+                <h3 class="form-section-title">Event template</h3>
+
+                <div class="outline-field">
+                  <input id="title-template" class="outline-input" type="text" placeholder=" " maxlength="100" autocomplete="off">
+                  <label class="outline-label" for="title-template">Title</label>
+                </div>
+                <div class="field-footer">
+                  <a href="/vars.html" target="_blank" rel="noopener" class="footer-vars-link">Supports formatting variables</a>
+                  <span class="footer-count"><span id="title-count">0</span> / 100</span>
+                </div>
+
+                <div class="desc-composite" id="desc-composite">
+                  <label class="desc-composite-label" for="desc-template">Description</label>
+                  <div class="desc-toolbar" id="desc-toolbar" role="toolbar" aria-label="Insert markdown">
+                    <button type="button" class="fmt-btn" data-fmt="channel" data-tooltip="Channel mention">#</button>
+                    <button type="button" class="fmt-btn" data-fmt="role" data-tooltip="Role mention">@</button>
+                    <button type="button" class="fmt-btn fmt-strong" data-fmt="bold" data-tooltip="Bold"><strong>B</strong></button>
+                    <button type="button" class="fmt-btn fmt-em" data-fmt="italic" data-tooltip="Italic"><em>I</em></button>
+                    <button type="button" class="fmt-btn fmt-ul" data-fmt="underline" data-tooltip="Underline"><span class="fmt-uline">U</span></button>
+                    <button type="button" class="fmt-btn fmt-strike" data-fmt="strike" data-tooltip="Strikethrough"><span>S</span></button>
+                    <button type="button" class="fmt-btn" data-fmt="link" data-tooltip="Insert link">↗</button>
+                    <button type="button" class="fmt-btn fmt-code" data-fmt="code" data-tooltip="Code">&lt;/&gt;</button>
+                  </div>
+                  <textarea id="desc-template" class="desc-composite-textarea" placeholder=" " rows="6" maxlength="940" spellcheck="true"></textarea>
+                </div>
+                <div class="field-footer">
+                  <a href="/vars.html" target="_blank" rel="noopener" class="footer-vars-link">Supports formatting variables</a>
+                  <span class="footer-count"><span id="desc-count">0</span> / 940</span>
+                </div>
+              </div>
+
+              <div class="form-section-divider" aria-hidden="true"></div>
+
+              <div class="form-section">
+                <h3 class="form-section-title">Event image</h3>
+                <div class="outline-field select-field">
+                  <select id="image-type" class="outline-input outline-select">
+                    <option value="none">No image (default)</option>
+                    <option value="profile">Broadcaster avatar</option>
+                    <option value="game">Game box art</option>
+                  </select>
+                  <label class="outline-label" for="image-type">Cover image</label>
+                </div>
+                <p class="form-section-help">This image will appear in the event details.</p>
+              </div>
+
+              <div class="form-section-divider" aria-hidden="true"></div>
+
+              <div class="form-section">
+                <h3 class="form-section-title">More settings</h3>
+                <div class="outline-field select-field">
+                  <select id="max-events" class="outline-input outline-select">
+                    <option value="5">5 events (default)</option>
+                    <option value="10">10 events</option>
+                    <option value="15">15 events</option>
+                    <option value="20">20 events</option>
+                    <option value="25">25 events</option>
+                  </select>
+                  <label class="outline-label" for="max-events">Max events per sync</label>
+                </div>
+                <p class="form-section-help">Limits how many upcoming events are synced per run.</p>
+              </div>
+
+              <div class="form-footer schedule-form-footer">
+                <label class="apply-all-label">
+                  <input type="checkbox" id="apply-all-servers">
+                  <span>Apply to all linked servers</span>
+                </label>
+                <button type="button" class="btn btn-primary" id="btn-save-settings">Save settings</button>
+                <span id="settings-saved" class="saved-toast" style="display:none">Saved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-logs" class="tab-panel" role="tabpanel" aria-labelledby="tab-logs" hidden>
+        <div class="card">
+          <div class="log-header">
+            <h2 class="card-h2" style="margin:0">Activity log</h2>
+            <div class="log-header-actions">
+              <button type="button" class="btn btn-secondary btn-small" id="btn-scroll-top">Top</button>
+              <button type="button" class="btn btn-danger btn-small" id="btn-clear-logs">Clear</button>
+            </div>
+          </div>
+          <div class="log-panel" id="log-panel">
+            <div class="empty-state">No log entries yet.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
