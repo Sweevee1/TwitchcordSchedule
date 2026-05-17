@@ -74,7 +74,8 @@ async function main() {
   });
 
   app.listen(config.PORT, () => {
-    logger.success('app', `Dashboard running at ${config.BASE_URL}`);
+    const url = config.BASE_URL ?? `http://YOUR_SERVER_IP:${config.PORT}`;
+    logger.success('app', `Dashboard running at ${url}`);
   });
 }
 
