@@ -92,59 +92,59 @@ Open the dashboard at [http://localhost:3000](http://localhost:3000).
 
 ## Unraid Installation
 
-### Step 1 — SSH into Unraid (or use Tools → Terminal)
+Every push to `master` automatically builds and publishes the Docker image to `ghcr.io/sweevee1/twitchcordschedule:latest` via GitHub Actions. Unraid can pull this image directly — no terminal or build step required.
 
-### Step 2 — Create an app directory and clone the repo
-```bash
-mkdir -p /mnt/user/appdata/twitchcordschedule
-cd /mnt/user/appdata/twitchcordschedule
-git clone https://github.com/Sweevee1/TwitchcordSchedule.git .
-```
+### Step 1 — Make the package public (one-time)
 
-### Step 3 — Create your `.env` file
-```bash
-cat > .env << 'EOF'
-TWITCH_CLIENT_ID=your_client_id
-TWITCH_CLIENT_SECRET=your_client_secret
-DISCORD_BOT_TOKEN=your_bot_token
-BASE_URL=http://YOUR_UNRAID_IP:3000
-PORT=3000
-EOF
-```
-Replace `YOUR_UNRAID_IP` with your Unraid server's LAN IP (e.g. `192.168.1.10`).
+1. Go to your GitHub profile → **Packages** → `twitchcordschedule`
+2. Package settings → Change visibility → **Public**
 
-### Step 4 — Build and start
-```bash
-docker compose up -d --build
-```
+This lets Unraid pull without authentication.
 
-### Step 5 — Open the dashboard
+### Step 2 — Add the container in Unraid's Docker tab
+
+1. Unraid web UI → **Docker** tab → **Add Container**
+2. Fill in the template:
+
+| Field | Value |
+|---|---|
+| Name | `twitchcordschedule` |
+| Repository | `ghcr.io/sweevee1/twitchcordschedule:latest` |
+| Network type | `bridge` |
+| Restart | `unless-stopped` |
+
+3. Click **Add another Path, Port, Variable or Device** for each item below:
+
+**Port:**
+| Type | Container Port | Host Port |
+|---|---|---|
+| Port | `3000` | `3000` (or any free port) |
+
+**Volume (database):**
+| Type | Container path | Host path |
+|---|---|---|
+| Path | `/app/data` | `/mnt/user/appdata/twitchcordschedule/data` |
+
+**Environment variables:**
+| Type | Name | Value |
+|---|---|---|
+| Variable | `TWITCH_CLIENT_ID` | your client ID |
+| Variable | `TWITCH_CLIENT_SECRET` | your client secret |
+| Variable | `DISCORD_BOT_TOKEN` | your bot token |
+| Variable | `BASE_URL` | `http://YOUR_UNRAID_IP:3000` |
+| Variable | `PORT` | `3000` |
+
+4. Click **Apply**
+
+### Step 3 — Open the dashboard
+
 `http://YOUR_UNRAID_IP:3000`
 
-From there: add a Twitch channel by username, then use the invite link in the dashboard to add the bot to your Discord server(s).
-
----
-
-### Keeping the database in a specific folder (easier Unraid backups)
-
-By default the database lives in a named Docker volume. To use a host path instead, edit `docker-compose.yml`:
-
-```yaml
-volumes:
-  - /mnt/user/appdata/twitchcordschedule/data:/app/data
-```
-
-### Auto-start on Unraid boot
-
-`restart: unless-stopped` is already set. Once started, the container restarts automatically.
+From there: add a Twitch channel by username, then use the invite link to add the bot to your Discord server(s).
 
 ### Updating
 
-```bash
-cd /mnt/user/appdata/twitchcordschedule
-git pull
-docker compose up -d --build
-```
+In Unraid's Docker tab, click the container icon → **Check for Updates**. If a new image is available, click **Update**. The database volume is preserved across updates.
 
 ---
 
