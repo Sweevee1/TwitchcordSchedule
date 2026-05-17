@@ -121,8 +121,7 @@ DB_PATH                 # optional — default ./data/db.sqlite
 
 ## Deployment
 - Docker image published to `ghcr.io/sweevee1/twitchcordschedule:latest` via GitHub Actions on every push to `master`.
-- **Unraid: use Host networking**, not Bridge. Bridge mode causes port forwarding failures on Unraid — the container starts fine but the port is unreachable from the LAN. Host mode binds directly to the host network stack.
-- With host networking there is no port mapping; the app listens on `PORT` (default 3000) directly on the host.
+- Mount `/app/data` to a host path for persistent storage. The Dockerfile sets `DB_PATH=/app/data/db.sqlite` by default.
 
 ## Known gotchas
 - `channel:read:schedule` Twitch OAuth scope causes "invalid scope" errors for new apps — this is why we use app token + username lookup instead of user OAuth.

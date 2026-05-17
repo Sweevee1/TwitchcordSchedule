@@ -21,8 +21,6 @@ const btnScrollTop     = document.getElementById('btn-scroll-top');
 const btnClearLogs     = document.getElementById('btn-clear-logs');
 const mainTitle        = document.getElementById('main-title');
 const mainAvatar       = document.getElementById('main-avatar');
-const usageGuildsEl    = document.getElementById('usage-guilds');
-const usageBarFill     = document.getElementById('usage-bar-fill');
 const titleTemplateEl    = document.getElementById('title-template');
 const descTemplateEl     = document.getElementById('desc-template');
 const titleCountEl       = document.getElementById('title-count');
@@ -80,15 +78,6 @@ function guildInitial(name) {
   if (!t) return '?';
   const ch = t[0];
   return /[a-zA-Z0-9]/.test(ch) ? ch.toUpperCase() : '#';
-}
-
-function updateUsageGuilds(guilds) {
-  const list = guilds || [];
-  const enabled = list.filter(g => g.enabled).length;
-  const total = list.length;
-  usageGuildsEl.textContent = `${enabled} / ${total}`;
-  const pct = total ? Math.round((enabled / total) * 100) : 0;
-  usageBarFill.style.width = `${pct}%`;
 }
 
 function updateCharCounts() {
@@ -303,7 +292,6 @@ async function pollStatus() {
       updateSidebarSelector(data.channels);
       renderSidebarGuilds();
     }
-    updateUsageGuilds(data.guilds);
   } catch (e) {
     showError('Could not reach server: ' + e.message);
   }

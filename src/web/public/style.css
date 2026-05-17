@@ -1190,37 +1190,6 @@ select option {
   color: var(--text);
 }
 
-.usage-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-}
-
-.usage-line.subtle {
-  margin-top: 14px;
-  margin-bottom: 0;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.usage-label { font-size: 13px; color: var(--text-muted); }
-.usage-value { font-size: 13px; font-weight: 700; color: var(--text); }
-
-.usage-bar {
-  height: 6px;
-  border-radius: 99px;
-  background: rgba(0, 0, 0, 0.35);
-  overflow: hidden;
-}
-
-.usage-bar-fill {
-  height: 100%;
-  border-radius: 99px;
-  background: var(--accent);
-  transition: width 0.25s ease;
-}
-
 /* ── Buttons ── */
 .btn {
   display: inline-flex;

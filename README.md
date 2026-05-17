@@ -37,9 +37,9 @@ Syncs Twitch stream schedules to Discord Guild Scheduled Events. Self-hosted alt
 | `TWITCH_CLIENT_ID` | Yes | From dev.twitch.tv |
 | `TWITCH_CLIENT_SECRET` | Yes | From dev.twitch.tv |
 | `DISCORD_BOT_TOKEN` | Yes | From discord.com/developers |
-| `BASE_URL` | No | Dashboard URL shown in startup log only. Omit unless you want a specific URL in logs. |
 | `PORT` | No | Dashboard port (default `3000`) |
 | `DB_PATH` | No | SQLite file path (default `/app/data/db.sqlite`) |
+| `BASE_URL` | No | Dashboard URL shown in startup log only |
 
 ---
 
@@ -85,73 +85,6 @@ docker compose up -d --build
 ```
 
 Open the dashboard at [http://localhost:3000](http://localhost:3000).
-
----
-
-## Unraid Installation
-
-Every push to `master` automatically builds and publishes the Docker image to `ghcr.io/sweevee1/twitchcordschedule:latest` via GitHub Actions. Unraid can pull this image directly — no terminal or build step required.
-
-### Step 1 — Make the package public (one-time)
-
-1. Go to your GitHub profile → **Packages** → `twitchcordschedule`
-2. Package settings → Change visibility → **Public**
-
-This lets Unraid pull without authentication.
-
-### Step 2 — Add the container in Unraid's Docker tab
-
-1. Unraid web UI → **Docker** tab → **Add Container**
-2. Fill in the template:
-
-| Field | Value |
-|---|---|
-| Name | `twitchcordschedule` |
-| Repository | `ghcr.io/sweevee1/twitchcordschedule:latest` |
-| Network type | `Host` |
-| WebUI | `http://[IP]:3000` |
-
-> **Use Host networking.** Bridge networking on Unraid causes port forwarding issues with this container. Host mode lets the app bind directly to the server's network.
-
-3. Click **Add another Path, Port, Variable or Device** for each item below:
-
-**Volume (database):**
-| Type | Container path | Host path |
-|---|---|---|
-| Path | `/app/data` | `/mnt/user/appdata/twitchcordschedule/data` |
-
-**Environment variables:**
-| Type | Name | Value |
-|---|---|---|
-| Variable | `TWITCH_CLIENT_ID` | your client ID |
-| Variable | `TWITCH_CLIENT_SECRET` | your client secret |
-| Variable | `DISCORD_BOT_TOKEN` | your bot token |
-
-4. Click **Apply**
-
-### Step 3 — Open the dashboard
-
-`http://YOUR_UNRAID_IP:3000`
-
-From there: add a Twitch channel by username, then use the invite link to add the bot to your Discord server(s).
-
-### Updating
-
-In Unraid's Docker tab, click the container icon → **Check for Updates**. If a new image is available, click **Update**. The database volume is preserved across updates.
-
----
-
-## How sync works
-
-Every 30 minutes the app:
-1. Fetches upcoming Twitch schedule segments for each configured channel
-2. For each linked Discord server:
-   - **Creates** Discord events for new segments
-   - **Updates** existing events if anything changed
-   - **Cancels** Discord events for segments that were cancelled on Twitch (sends subscriber notification)
-   - **Deletes** Discord events for segments that were removed entirely
-
-Only events created by this bot are ever modified — manually created Discord events are never touched.
 
 ---
 
