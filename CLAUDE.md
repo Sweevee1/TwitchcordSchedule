@@ -99,25 +99,30 @@ Global defaults from `settings` are copied into new links on creation. Default `
 | POST | `/auth/twitch/channel` | Add Twitch channel by username |
 
 ## Dashboard UI notes
-- **Sidebar**: shows linked guilds for the selected Twitch channel only (unlinked servers hidden). Toggling a guild off unlinks it immediately.
+- **Sidebar**: shows linked guilds for the selected Twitch channel only (unlinked servers hidden). Clicking a guild row navigates to the Schedule tab with that channel + server pre-selected. Toggling the enable switch unlinks the guild immediately (toggle click is isolated from row navigation via `stopPropagation`).
 - **Schedule tab**: two-level selector (channel + server). Templates are saved per-connection. "Apply to all linked servers" checkbox saves to all linked guilds at once (auto-unchecks after save).
 - **Remove channel**: two-step confirmation — first click shows "Remove?" button (red, 3 s timeout), second click executes.
 - **Description toolbar**: `#` inserts `#` (channel mention), `@` inserts `@` (role mention), plus bold/italic/underline/strikethrough/link/code. All buttons have hover tooltip popups.
 
-## Required env vars
+## Env vars
 ```
-TWITCH_CLIENT_ID        # from dev.twitch.tv
-TWITCH_CLIENT_SECRET    # from dev.twitch.tv
-DISCORD_BOT_TOKEN       # from discord.com/developers
-BASE_URL                # public-facing URL e.g. http://myserver:3000
-PORT                    # default 3000
-DB_PATH                 # default ./data/db.sqlite
+TWITCH_CLIENT_ID        # required — from dev.twitch.tv
+TWITCH_CLIENT_SECRET    # required — from dev.twitch.tv
+DISCORD_BOT_TOKEN       # required — from discord.com/developers
+BASE_URL                # optional — shown in startup log only, no functional effect
+PORT                    # optional — default 3000
+DB_PATH                 # optional — default ./data/db.sqlite
 ```
 
 ## Discord bot requirements
 - Permissions: `ManageEvents` + `ViewChannel`
 - Scopes for invite URL: `bot` + `applications.commands` (both required — bot-only scope triggers code grant error)
 - Intents: `Guilds` + `GuildScheduledEvents`
+
+## Deployment
+- Docker image published to `ghcr.io/sweevee1/twitchcordschedule:latest` via GitHub Actions on every push to `master`.
+- **Unraid: use Host networking**, not Bridge. Bridge mode causes port forwarding failures on Unraid — the container starts fine but the port is unreachable from the LAN. Host mode binds directly to the host network stack.
+- With host networking there is no port mapping; the app listens on `PORT` (default 3000) directly on the host.
 
 ## Known gotchas
 - `channel:read:schedule` Twitch OAuth scope causes "invalid scope" errors for new apps — this is why we use app token + username lookup instead of user OAuth.
@@ -127,3 +132,5 @@ DB_PATH                 # default ./data/db.sqlite
 - `better-sqlite3` requires Visual Studio C++ build tools on Windows — do NOT reintroduce it.
 - Static files (`src/web/public/`) are not copied by `tsc`. The Dockerfile handles this with an explicit `COPY` step.
 - SQLite can't drop columns — dead template columns on `twitch_channels` are left in place; the sync engine reads from `channel_guild_links` instead.
+- `BASE_URL` auto-detection via `os.networkInterfaces()` does not work inside Docker bridge containers (returns the Docker bridge IP `172.17.x.x`, not the host LAN IP). `BASE_URL` is purely cosmetic — omit it in Docker.
+- Discord's `GuildScheduledEventStatus` uses American spelling: `Canceled` (one L), not `Cancelled`.

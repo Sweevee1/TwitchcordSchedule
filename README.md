@@ -37,7 +37,7 @@ Syncs Twitch stream schedules to Discord Guild Scheduled Events. Self-hosted alt
 | `TWITCH_CLIENT_ID` | Yes | From dev.twitch.tv |
 | `TWITCH_CLIENT_SECRET` | Yes | From dev.twitch.tv |
 | `DISCORD_BOT_TOKEN` | Yes | From discord.com/developers |
-| `BASE_URL` | No | Dashboard URL shown in startup log. Auto-detected from local IP if not set. |
+| `BASE_URL` | No | Dashboard URL shown in startup log only. Omit unless you want a specific URL in logs. |
 | `PORT` | No | Dashboard port (default `3000`) |
 | `DB_PATH` | No | SQLite file path (default `/app/data/db.sqlite`) |
 
@@ -108,15 +108,12 @@ This lets Unraid pull without authentication.
 |---|---|
 | Name | `twitchcordschedule` |
 | Repository | `ghcr.io/sweevee1/twitchcordschedule:latest` |
-| Network type | `bridge` |
-| Restart | `unless-stopped` |
+| Network type | `Host` |
+| WebUI | `http://[IP]:3000` |
+
+> **Use Host networking.** Bridge networking on Unraid causes port forwarding issues with this container. Host mode lets the app bind directly to the server's network.
 
 3. Click **Add another Path, Port, Variable or Device** for each item below:
-
-**Port:**
-| Type | Container Port | Host Port |
-|---|---|---|
-| Port | `3000` | `3000` (or any free port) |
 
 **Volume (database):**
 | Type | Container path | Host path |
