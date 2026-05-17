@@ -1,7 +1,7 @@
 # TwitchcordSchedule — Claude Context
 
 ## What this project is
-A Node.js/TypeScript app that polls one or more Twitch channels' stream schedules every 30 minutes and syncs segments as Discord Guild Scheduled Events across multiple Discord servers. Runs 24/7 as a Docker container. Has a dark web dashboard at port 3000.
+A Node.js/TypeScript app that polls one or more Twitch channels' stream schedules every 30 minutes and syncs segments as Discord Guild Scheduled Events across multiple Discord servers. Cancelled Twitch segments cancel (not just delete) the corresponding Discord event so subscribers are notified. Runs 24/7 as a Docker container. Has a dark web dashboard at port 3000.
 
 ## Dev commands
 ```
@@ -37,7 +37,7 @@ src/
     images.ts           # URL → base64 data URI, in-memory cache per sync run
   discord/
     client.ts           # builds discord.js Client with correct intents
-    events.ts           # createEvent / updateEvent / deleteEvent via EventPayload
+    events.ts           # createEvent / updateEvent / deleteEvent / cancelEvent via EventPayload
     invite.ts           # generates bot invite URL (bot + applications.commands scopes)
   sync/
     engine.ts           # runSync() — diff-and-apply logic, applies per-link templates + image
@@ -59,7 +59,7 @@ src/
 ## SQLite tables
 | Table | Purpose |
 |---|---|
-| `twitch_channels` | All tracked Twitch channels: broadcaster_id, broadcaster_name, display_name, profile_image_url, added_at |
+| `twitch_channels` | All tracked Twitch channels: broadcaster_id, broadcaster_name, display_name, profile_image_url, broadcaster_description, added_at |
 | `channel_guild_links` | Per-connection settings: (broadcaster_id × guild_id) + title_template, description_template, image_type, max_events |
 | `guilds` | All Discord servers the bot is in; `enabled` toggle |
 | `sync_mappings` | Maps (twitch_segment_id, guild_id) → discord_event_id |
@@ -70,8 +70,6 @@ src/
 ```typescript
 interface AppState {
   twitchConnected: boolean;
-  twitchBroadcasterId: string | null;
-  twitchDisplayName: string | null;
   lastSync: Date | null;
   nextSync: Date | null;
   syncInProgress: boolean;
@@ -79,7 +77,11 @@ interface AppState {
 ```
 
 ## Template system
-Templates in `channel_guild_links` use `{variable}` syntax. Available variables: `{title}`, `{category}`, `{broadcaster}`. Applied in `engine.ts` via `applyTemplate()`. Global defaults from `settings` are copied into new links on creation. Default `max_events` is **5**.
+Templates in `channel_guild_links` use `{variable}` syntax, parsed by `applyTemplate()` in `engine.ts`. Regex: `/\{([\w.]+)(?::([A-Za-z]))?\}/g` — supports dot-notation keys and `:STYLE` suffix for Discord timestamps.
+
+Available variables: `{title}` / `{stream.title}`, `{category}` / `{game.name}`, `{broadcaster}` / `{user.name}` / `{user.twitch_name}`, `{user.twitch_url}`, `{user.description}`, `{user.__id__}`, `{game.__id__}`, `{event.start_time}`, `{event.end_time}`. Timestamp variables emit `<t:UNIX>` or `<t:UNIX:STYLE>` Discord timestamps.
+
+Global defaults from `settings` are copied into new links on creation. Default `max_events` is **5**.
 
 ## Dashboard API routes
 | Method | Path | Description |

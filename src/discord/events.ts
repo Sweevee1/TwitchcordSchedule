@@ -1,6 +1,7 @@
 import {
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
+  GuildScheduledEventStatus,
   DiscordAPIError,
   type Guild,
 } from 'discord.js';
@@ -33,11 +34,12 @@ export async function createEvent(guild: Guild, payload: EventPayload): Promise<
   return event.id;
 }
 
-export async function updateEvent(guild: Guild, eventId: string, payload: EventPayload): Promise<void> {
+export async function updateEvent(guild: Guild, eventId: string, payload: EventPayload): Promise<boolean> {
   try {
     await guild.scheduledEvents.edit(eventId, buildOptions(payload));
+    return true;
   } catch (err) {
-    if (err instanceof DiscordAPIError && err.code === UNKNOWN_SCHEDULED_EVENT) return;
+    if (err instanceof DiscordAPIError && err.code === UNKNOWN_SCHEDULED_EVENT) return false;
     throw err;
   }
 }
@@ -45,6 +47,15 @@ export async function updateEvent(guild: Guild, eventId: string, payload: EventP
 export async function deleteEvent(guild: Guild, eventId: string): Promise<void> {
   try {
     await guild.scheduledEvents.delete(eventId);
+  } catch (err) {
+    if (err instanceof DiscordAPIError && err.code === UNKNOWN_SCHEDULED_EVENT) return;
+    throw err;
+  }
+}
+
+export async function cancelEvent(guild: Guild, eventId: string): Promise<void> {
+  try {
+    await guild.scheduledEvents.edit(eventId, { status: GuildScheduledEventStatus.Canceled });
   } catch (err) {
     if (err instanceof DiscordAPIError && err.code === UNKNOWN_SCHEDULED_EVENT) return;
     throw err;

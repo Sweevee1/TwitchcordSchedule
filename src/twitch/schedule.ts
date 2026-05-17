@@ -7,6 +7,7 @@ export interface NormalizedSegment {
   categoryName: string | null;
   startTime: Date;
   endTime: Date;
+  isCanceled: boolean;
 }
 
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
@@ -33,6 +34,7 @@ export async function fetchScheduleSegments(
       categoryName: segment.categoryName,
       startTime: segment.startDate,
       endTime,
+      isCanceled: segment.cancelEndDate !== null,
     });
   }
 

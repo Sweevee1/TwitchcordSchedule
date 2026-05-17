@@ -4,7 +4,7 @@ import type { DatabaseQueries, TwitchChannelRow } from '../db';
 import type { Logger } from '../logger';
 import { fetchScheduleSegments, type NormalizedSegment } from '../twitch/schedule';
 import { getBroadcasterImage, getGameImage, clearImageCache } from '../twitch/images';
-import { createEvent, updateEvent, deleteEvent, type EventPayload } from '../discord/events';
+import { createEvent, updateEvent, deleteEvent, cancelEvent, type EventPayload } from '../discord/events';
 
 export interface AppState {
   twitchConnected: boolean;
@@ -15,6 +15,8 @@ export interface AppState {
 
 interface PayloadConfig {
   broadcaster_id: string;
+  broadcaster_name: string;
+  broadcaster_description: string;
   display_name: string;
   title_template: string;
   description_template: string;
@@ -22,7 +24,13 @@ interface PayloadConfig {
 }
 
 function applyTemplate(template: string, vars: Record<string, string>): string {
-  return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? '');
+  return template.replace(/\{([\w.]+)(?::([A-Za-z]))?\}/g, (match, key, style) => {
+    if (!Object.prototype.hasOwnProperty.call(vars, key)) return '';
+    if ((key === 'event.start_time' || key === 'event.end_time') && vars[key]) {
+      return style ? `<t:${vars[key]}:${style}>` : `<t:${vars[key]}>`;
+    }
+    return vars[key];
+  });
 }
 
 async function buildPayload(
@@ -34,6 +42,16 @@ async function buildPayload(
     title: segment.title,
     category: segment.categoryName ?? '',
     broadcaster: config.display_name,
+    'stream.title': segment.title,
+    'game.name': segment.categoryName ?? '',
+    'game.__id__': segment.categoryId ?? '',
+    'user.twitch_url': `https://twitch.tv/${config.broadcaster_name}`,
+    'user.twitch_name': config.broadcaster_name,
+    'user.name': config.broadcaster_name,
+    'user.description': config.broadcaster_description,
+    'user.__id__': config.broadcaster_id,
+    'event.start_time': String(Math.floor(segment.startTime.getTime() / 1000)),
+    'event.end_time': String(Math.floor(segment.endTime.getTime() / 1000)),
   };
 
   const name = applyTemplate(config.title_template || '{title}', vars).trim() || segment.title;
@@ -83,8 +101,10 @@ async function syncChannel(
         continue;
       }
 
-      const segments = allSegments.slice(0, linkRow.max_events);
-      const desiredMap = new Map<string, NormalizedSegment>(segments.map(s => [s.id, s]));
+      const capped = allSegments.slice(0, linkRow.max_events);
+      const activeSegments = capped.filter(s => !s.isCanceled);
+      const cancelledIds = new Set(capped.filter(s => s.isCanceled).map(s => s.id));
+      const desiredMap = new Map<string, NormalizedSegment>(activeSegments.map(s => [s.id, s]));
 
       const existingMappings = db.getMappingsByGuild(guildId)
         .filter(m => m.broadcaster_id === channel.broadcaster_id);
@@ -92,37 +112,42 @@ async function syncChannel(
 
       const config: PayloadConfig = {
         broadcaster_id: channel.broadcaster_id,
+        broadcaster_name: channel.broadcaster_name,
+        broadcaster_description: channel.broadcaster_description,
         display_name: channel.display_name,
         title_template: linkRow.title_template,
         description_template: linkRow.description_template,
         image_type: linkRow.image_type,
       };
 
-      let created = 0, updated = 0, deleted = 0;
+      let created = 0, updated = 0, deleted = 0, cancelled = 0;
 
       for (const [segmentId, segment] of desiredMap) {
         const payload = await buildPayload(segment, config, apiClient);
         const existingEventId = mappingMap.get(segmentId);
-        if (!existingEventId) {
+        if (!existingEventId || !await updateEvent(guild, existingEventId, payload)) {
           const newEventId = await createEvent(guild, payload);
           db.upsertSyncMapping(segmentId, guildId, newEventId, channel.broadcaster_id);
           created++;
         } else {
-          await updateEvent(guild, existingEventId, payload);
           db.upsertSyncMapping(segmentId, guildId, existingEventId, channel.broadcaster_id);
           updated++;
         }
       }
 
       for (const mapping of existingMappings) {
-        if (!desiredMap.has(mapping.twitch_segment_id)) {
+        if (cancelledIds.has(mapping.twitch_segment_id)) {
+          await cancelEvent(guild, mapping.discord_event_id);
+          db.deleteMappingByDiscordEventId(mapping.discord_event_id, guildId);
+          cancelled++;
+        } else if (!desiredMap.has(mapping.twitch_segment_id)) {
           await deleteEvent(guild, mapping.discord_event_id);
           db.deleteMappingByDiscordEventId(mapping.discord_event_id, guildId);
           deleted++;
         }
       }
 
-      logger.success(`discord:${guildId}`, `"${guildName}" ← ${channel.display_name}: +${created} ~${updated} -${deleted}`);
+      logger.success(`discord:${guildId}`, `"${guildName}" ← ${channel.display_name}: +${created} ~${updated} -${deleted} ✕${cancelled}`);
     } catch (err) {
       logger.error(`discord:${guildId}`, `"${guildName}" sync failed: ${String(err)}`);
     }

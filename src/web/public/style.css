@@ -293,6 +293,7 @@ code {
   padding: 5px 8px;
   border-radius: var(--radius-sm);
   transition: background 0.1s;
+  cursor: pointer;
 }
 
 .cg-guild-row:hover { background: rgba(255,255,255,0.04); }

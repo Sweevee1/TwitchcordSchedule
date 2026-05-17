@@ -5,12 +5,14 @@ import { createLogger } from './logger';
 import { buildAppAuthProvider } from './twitch/auth';
 import { buildApiClient } from './twitch/client';
 import { buildDiscordClient } from './discord/client';
+import { initImageCredentials } from './twitch/images';
 import { createExpressApp } from './web/server';
 import { runSync, runSyncForChannel, type AppState } from './sync/engine';
 import { startScheduler } from './sync/scheduler';
 
 async function main() {
   const config = loadConfig();
+  initImageCredentials(config.TWITCH_CLIENT_ID, config.TWITCH_CLIENT_SECRET);
   const db = openDatabase(config.DB_PATH);
   const logger = createLogger(db);
 

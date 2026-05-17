@@ -8,7 +8,7 @@ export function buildAppAuthProvider(config: Config): AppTokenAuthProvider {
 export async function lookupBroadcaster(
   channelName: string,
   config: Config
-): Promise<{ id: string; name: string; displayName: string; profileImageUrl: string } | null> {
+): Promise<{ id: string; name: string; displayName: string; profileImageUrl: string; description: string } | null> {
   // Use app access token via client credentials to look up the user
   const tokenRes = await fetch('https://id.twitch.tv/oauth2/token', {
     method: 'POST',
@@ -32,8 +32,8 @@ export async function lookupBroadcaster(
     }
   );
   if (!userRes.ok) throw new Error(`Twitch user lookup failed: ${userRes.status}`);
-  const data = await userRes.json() as { data: Array<{ id: string; login: string; display_name: string; profile_image_url: string }> };
+  const data = await userRes.json() as { data: Array<{ id: string; login: string; display_name: string; profile_image_url: string; description: string }> };
   const user = data.data[0];
   if (!user) return null;
-  return { id: user.id, name: user.login, displayName: user.display_name, profileImageUrl: user.profile_image_url ?? '' };
+  return { id: user.id, name: user.login, displayName: user.display_name, profileImageUrl: user.profile_image_url ?? '', description: user.description ?? '' };
 }

@@ -129,27 +129,34 @@ export function createApiRouter(
     res.json({ ok: true });
   });
 
+  const deletingChannels = new Set<string>();
+
   // Per-channel: remove channel and clean up Discord events
   router.delete('/channels/:broadcasterId', async (req, res) => {
     const { broadcasterId } = req.params;
+    if (deletingChannels.has(broadcasterId)) return res.status(409).json({ error: 'Removal already in progress' });
     const channel = db.getAllChannels().find(c => c.broadcaster_id === broadcasterId);
     if (!channel) return res.status(404).json({ error: 'Channel not found' });
-
-    const mappings = db.getMappingsByBroadcaster(broadcasterId);
-    let cleaned = 0;
-    for (const mapping of mappings) {
-      const guild = discordClient.guilds.cache.get(mapping.guild_id);
-      if (guild) {
-        try { await deleteEvent(guild, mapping.discord_event_id); cleaned++; } catch {}
+    deletingChannels.add(broadcasterId);
+    try {
+      const mappings = db.getMappingsByBroadcaster(broadcasterId);
+      let cleaned = 0;
+      for (const mapping of mappings) {
+        const guild = discordClient.guilds.cache.get(mapping.guild_id);
+        if (guild) {
+          try { await deleteEvent(guild, mapping.discord_event_id); cleaned++; } catch {}
+        }
+        db.deleteMappingByDiscordEventId(mapping.discord_event_id, mapping.guild_id);
       }
-      db.deleteMappingByDiscordEventId(mapping.discord_event_id, mapping.guild_id);
+
+      db.removeChannel(broadcasterId);
+      appState.twitchConnected = db.getAllChannels().length > 0;
+
+      logger.info('api', `Removed ${channel.display_name}, cleaned ${cleaned} Discord events`);
+      res.json({ ok: true });
+    } finally {
+      deletingChannels.delete(broadcasterId);
     }
-
-    db.removeChannel(broadcasterId);
-    appState.twitchConnected = db.getAllChannels().length > 0;
-
-    logger.info('api', `Removed ${channel.display_name}, cleaned ${cleaned} Discord events`);
-    res.json({ ok: true });
   });
 
   router.post('/sync', (_req, res) => {

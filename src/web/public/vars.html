@@ -247,7 +247,7 @@
   </div>
 
   <div class="docs-section">
-    <div class="docs-section-title">Available variables</div>
+    <div class="docs-section-title">Stream variables</div>
     <table class="var-table">
       <thead>
         <tr>
@@ -259,13 +259,8 @@
       </thead>
       <tbody>
         <tr>
-          <td><span class="var-name">{title}</span></td>
-          <td>
-            <span class="var-desc">
-              The scheduled stream title set by the broadcaster on Twitch.
-              <small>Falls back to an empty string if not set.</small>
-            </span>
-          </td>
+          <td><span class="var-name">{title}<br>{stream.title}</span></td>
+          <td><span class="var-desc">The scheduled stream title set by the broadcaster on Twitch.</span></td>
           <td>
             <div class="availability">
               <span class="avail-pill avail-title">Title</span>
@@ -275,7 +270,7 @@
           <td><span class="var-example">Ranked Games</span></td>
         </tr>
         <tr>
-          <td><span class="var-name">{category}</span></td>
+          <td><span class="var-name">{category}<br>{game.name}</span></td>
           <td>
             <span class="var-desc">
               The game or category the stream is scheduled under.
@@ -291,10 +286,60 @@
           <td><span class="var-example">Valorant</span></td>
         </tr>
         <tr>
-          <td><span class="var-name">{broadcaster}</span></td>
+          <td><span class="var-name">{game.__id__}</span></td>
+          <td><span class="var-desc">The internal Twitch ID of the game/category.</span></td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-title">Title</span>
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">516575</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="docs-section">
+    <div class="docs-section-title">User variables</div>
+    <table class="var-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Available in</th>
+          <th>Example value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="var-name">{broadcaster}<br>{user.twitch_name}<br>{user.name}</span></td>
+          <td><span class="var-desc">The broadcaster's Twitch login name.</span></td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-title">Title</span>
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">sweevee</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-name">{user.twitch_url}</span></td>
+          <td><span class="var-desc">The full twitch.tv URL of the broadcaster's channel.</span></td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-title">Title</span>
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">https://twitch.tv/sweevee</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-name">{user.description}</span></td>
           <td>
             <span class="var-desc">
-              The broadcaster's display name as it appears on their Twitch channel.
+              The broadcaster's Twitch bio/channel description.
+              <small>Captured when the channel is added. Empty string if not set.</small>
             </span>
           </td>
           <td>
@@ -303,7 +348,64 @@
               <span class="avail-pill avail-desc">Description</span>
             </div>
           </td>
-          <td><span class="var-example">Sweevee</span></td>
+          <td><span class="var-example">Just a chill streamer</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-name">{user.__id__}</span></td>
+          <td><span class="var-desc">The broadcaster's internal Twitch user ID.</span></td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-title">Title</span>
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">114969412</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="docs-section">
+    <div class="docs-section-title">Timestamp variables</div>
+    <table class="var-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Available in</th>
+          <th>Example output</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="var-name">{event.start_time}<br>{event.start_time:STYLE}</span></td>
+          <td>
+            <span class="var-desc">
+              Discord timestamp for the event start time. Renders as a live, localised time in Discord.
+              <small>Append a style letter: <code>t</code> short time · <code>T</code> long time · <code>d</code> short date · <code>D</code> long date · <code>f</code> date+time (default) · <code>F</code> full date+time · <code>R</code> relative</small>
+            </span>
+          </td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">&lt;t:1748000000:R&gt;</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-name">{event.end_time}<br>{event.end_time:STYLE}</span></td>
+          <td>
+            <span class="var-desc">
+              Discord timestamp for the event end time. Accepts the same style letters as <code>{event.start_time}</code>.
+              <small>If the Twitch segment has no end time, defaults to start time + 2 hours.</small>
+            </span>
+          </td>
+          <td>
+            <div class="availability">
+              <span class="avail-pill avail-desc">Description</span>
+            </div>
+          </td>
+          <td><span class="var-example">&lt;t:1748007200:R&gt;</span></td>
         </tr>
       </tbody>
     </table>
@@ -314,20 +416,20 @@
     <div class="example-block">
       <div class="example-row">
         <div class="example-label">Title template</div>
-        <div class="example-val example-template">{broadcaster} — {title}</div>
+        <div class="example-val example-template">{stream.title} · {game.name}</div>
       </div>
       <div class="example-row">
         <div class="example-label">Description template</div>
-        <div class="example-val example-template">Tune in for some {category}! Follow at twitch.tv/{broadcaster}</div>
+        <div class="example-val example-template">Starting {event.start_time:R} — watch at {user.twitch_url}</div>
       </div>
       <div class="example-arrow">↓ after sync</div>
       <div class="example-row">
         <div class="example-label">Event title</div>
-        <div class="example-val example-result">Sweevee — Ranked Games</div>
+        <div class="example-val example-result">Ranked Games · Valorant</div>
       </div>
       <div class="example-row">
         <div class="example-label">Event description</div>
-        <div class="example-val example-result">Tune in for some Valorant! Follow at twitch.tv/Sweevee</div>
+        <div class="example-val example-result">Starting &lt;t:1748000000:R&gt; — watch at https://twitch.tv/sweevee</div>
       </div>
     </div>
 

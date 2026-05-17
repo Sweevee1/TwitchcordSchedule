@@ -310,6 +310,8 @@ async function pollStatus() {
 }
 
 function renderChannels(channels) {
+  for (const t of pendingRemovals.values()) clearTimeout(t);
+  pendingRemovals.clear();
   if (!channels || channels.length === 0) {
     channelList.innerHTML = '<div class="channel-empty">No channels added yet.</div>';
     return;
@@ -425,10 +427,10 @@ function renderSidebarGuilds() {
       ? `<img class="cg-guild-icon guild-avatar-img" src="${escHtml(g.icon)}" alt="">`
       : `<div class="cg-guild-icon cg-guild-letter">${escHtml(guildInitial(g.name))}</div>`;
     return `
-    <div class="cg-guild-row">
+    <div class="cg-guild-row" onclick="goToSchedule('${escHtml(activeChannelId)}','${escHtml(g.guild_id)}')">
       ${iconHtml}
       <span class="cg-guild-name">${escHtml(g.name)}</span>
-      <label class="toggle" title="Unlink from this channel">
+      <label class="toggle" title="Unlink from this channel" onclick="event.stopPropagation()">
         <input type="checkbox" checked
           onchange="toggleChannelGuild('${escHtml(activeChannelId)}','${escHtml(g.guild_id)}',this)">
         <span class="toggle-slider"></span>
@@ -438,6 +440,15 @@ function renderSidebarGuilds() {
 
   cgList.innerHTML = linked.map(renderRow).join('');
 }
+
+function goToSchedule(broadcasterId, guildId) {
+  activeChannelId = broadcasterId;
+  channelSelector.value = broadcasterId;
+  selectedGuildId = guildId;
+  refreshGuildSelector();
+  setTab('schedule');
+}
+window.goToSchedule = goToSchedule;
 
 sidebarChannelSelector.addEventListener('change', () => setActiveChannel(sidebarChannelSelector.value));
 

@@ -75,6 +75,7 @@ export function runMigrations(db: DatabaseSync): void {
   try { db.exec(`ALTER TABLE guilds ADD COLUMN icon TEXT`); } catch {}
   try { db.exec(`ALTER TABLE sync_mappings ADD COLUMN broadcaster_id TEXT NOT NULL DEFAULT ''`); } catch {}
   try { db.exec(`ALTER TABLE twitch_channels ADD COLUMN profile_image_url TEXT NOT NULL DEFAULT ''`); } catch {}
+  try { db.exec(`ALTER TABLE twitch_channels ADD COLUMN broadcaster_description TEXT NOT NULL DEFAULT ''`); } catch {}
   try { db.exec(`ALTER TABLE twitch_channels ADD COLUMN title_template TEXT NOT NULL DEFAULT '{title}'`); } catch {}
   try { db.exec(`ALTER TABLE twitch_channels ADD COLUMN description_template TEXT NOT NULL DEFAULT '{category}'`); } catch {}
   try { db.exec(`ALTER TABLE twitch_channels ADD COLUMN image_type TEXT NOT NULL DEFAULT 'none'`); } catch {}

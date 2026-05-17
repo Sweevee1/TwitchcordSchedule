@@ -25,7 +25,7 @@ export function createAuthRouter(
         return res.status(404).json({ error: `Twitch channel "${channelName}" not found` });
       }
 
-      db.addChannel(broadcaster.id, broadcaster.name, broadcaster.displayName, broadcaster.profileImageUrl);
+      db.addChannel(broadcaster.id, broadcaster.name, broadcaster.displayName, broadcaster.profileImageUrl, broadcaster.description);
       db.linkChannelToAllGuilds(broadcaster.id);
       appState.twitchConnected = true;
 

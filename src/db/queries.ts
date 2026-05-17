@@ -5,6 +5,7 @@ export interface TwitchChannelRow {
   broadcaster_name: string;
   display_name: string;
   profile_image_url: string;
+  broadcaster_description: string;
   title_template: string;
   description_template: string;
   image_type: 'none' | 'profile' | 'game';
@@ -68,7 +69,7 @@ export interface LinkSettings {
 
 export interface DatabaseQueries {
   getAllChannels(): TwitchChannelRow[];
-  addChannel(broadcasterId: string, broadcasterName: string, displayName: string, profileImageUrl: string): void;
+  addChannel(broadcasterId: string, broadcasterName: string, displayName: string, profileImageUrl: string, description: string): void;
   removeChannel(broadcasterId: string): void;
   getGuildsForChannel(broadcasterId: string): GuildWithLink[];
   getLinkedGuildsWithSettings(broadcasterId: string): GuildWithLinkSettings[];
@@ -98,12 +99,13 @@ export function buildQueries(db: DatabaseSync): DatabaseQueries {
   const stmts = {
     getAllChannels: db.prepare(`SELECT * FROM twitch_channels ORDER BY added_at`),
     addChannel: db.prepare(
-      `INSERT INTO twitch_channels (broadcaster_id, broadcaster_name, display_name, profile_image_url, added_at)
-       VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO twitch_channels (broadcaster_id, broadcaster_name, display_name, profile_image_url, broadcaster_description, added_at)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(broadcaster_id) DO UPDATE SET
          broadcaster_name = excluded.broadcaster_name,
          display_name = excluded.display_name,
-         profile_image_url = excluded.profile_image_url`
+         profile_image_url = excluded.profile_image_url,
+         broadcaster_description = excluded.broadcaster_description`
     ),
     removeChannel: db.prepare(`DELETE FROM twitch_channels WHERE broadcaster_id = ?`),
     removeChannelLinks: db.prepare(`DELETE FROM channel_guild_links WHERE broadcaster_id = ?`),
@@ -210,8 +212,8 @@ export function buildQueries(db: DatabaseSync): DatabaseQueries {
     getAllChannels() {
       return stmts.getAllChannels.all() as unknown as TwitchChannelRow[];
     },
-    addChannel(broadcasterId, broadcasterName, displayName, profileImageUrl) {
-      stmts.addChannel.run(broadcasterId, broadcasterName, displayName, profileImageUrl, Date.now());
+    addChannel(broadcasterId, broadcasterName, displayName, profileImageUrl, description) {
+      stmts.addChannel.run(broadcasterId, broadcasterName, displayName, profileImageUrl, description, Date.now());
     },
     removeChannel(broadcasterId) {
       stmts.removeChannelLinks.run(broadcasterId);
