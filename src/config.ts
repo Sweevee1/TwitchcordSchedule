@@ -1,3 +1,5 @@
+import { networkInterfaces } from 'os';
+
 export interface Config {
   TWITCH_CLIENT_ID: string;
   TWITCH_CLIENT_SECRET: string;
@@ -7,17 +9,28 @@ export interface Config {
   DB_PATH: string;
 }
 
+function detectBaseUrl(port: number): string {
+  if (process.env.BASE_URL) return process.env.BASE_URL.replace(/\/$/, '');
+  for (const iface of Object.values(networkInterfaces()).flat()) {
+    if (iface && iface.family === 'IPv4' && !iface.internal) {
+      return `http://${iface.address}:${port}`;
+    }
+  }
+  return `http://localhost:${port}`;
+}
+
 export function loadConfig(): Config {
-  const required = ['TWITCH_CLIENT_ID', 'TWITCH_CLIENT_SECRET', 'DISCORD_BOT_TOKEN', 'BASE_URL'] as const;
+  const required = ['TWITCH_CLIENT_ID', 'TWITCH_CLIENT_SECRET', 'DISCORD_BOT_TOKEN'] as const;
   for (const key of required) {
     if (!process.env[key]) throw new Error(`Missing required env var: ${key}`);
   }
+  const port = parseInt(process.env.PORT ?? '3000', 10);
   return {
     TWITCH_CLIENT_ID: process.env.TWITCH_CLIENT_ID!,
     TWITCH_CLIENT_SECRET: process.env.TWITCH_CLIENT_SECRET!,
     DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN!,
-    PORT: parseInt(process.env.PORT ?? '3000', 10),
-    BASE_URL: process.env.BASE_URL!.replace(/\/$/, ''),
+    PORT: port,
+    BASE_URL: detectBaseUrl(port),
     DB_PATH: process.env.DB_PATH ?? './data/db.sqlite',
   };
 }

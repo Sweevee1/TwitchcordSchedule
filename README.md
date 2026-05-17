@@ -37,7 +37,7 @@ Syncs Twitch stream schedules to Discord Guild Scheduled Events. Self-hosted alt
 | `TWITCH_CLIENT_ID` | Yes | From dev.twitch.tv |
 | `TWITCH_CLIENT_SECRET` | Yes | From dev.twitch.tv |
 | `DISCORD_BOT_TOKEN` | Yes | From discord.com/developers |
-| `BASE_URL` | Yes | Public-facing URL of the dashboard, e.g. `http://192.168.1.10:3000` |
+| `BASE_URL` | No | Dashboard URL shown in startup log. Auto-detected from local IP if not set. |
 | `PORT` | No | Dashboard port (default `3000`) |
 | `DB_PATH` | No | SQLite file path (default `/app/data/db.sqlite`) |
 
@@ -77,8 +77,6 @@ Create a `.env` file:
 TWITCH_CLIENT_ID=your_client_id
 TWITCH_CLIENT_SECRET=your_client_secret
 DISCORD_BOT_TOKEN=your_bot_token
-BASE_URL=http://localhost:3000
-PORT=3000
 ```
 
 Build and run:
@@ -131,8 +129,6 @@ This lets Unraid pull without authentication.
 | Variable | `TWITCH_CLIENT_ID` | your client ID |
 | Variable | `TWITCH_CLIENT_SECRET` | your client secret |
 | Variable | `DISCORD_BOT_TOKEN` | your bot token |
-| Variable | `BASE_URL` | `http://YOUR_UNRAID_IP:3000` |
-| Variable | `PORT` | `3000` |
 
 4. Click **Apply**
 
