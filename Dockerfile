@@ -11,7 +11,7 @@ RUN cp -r src/web/public dist/web/public
 
 # Stage 2: runtime
 FROM node:22-alpine AS runtime
-LABEL net.unraid.docker.icon="https://raw.githubusercontent.com/Sweevee1/TwitchcordSchedule/master/src/web/public/favicon.svg"
+LABEL net.unraid.docker.icon="https://raw.githubusercontent.com/Sweevee1/TwitchcordSchedule/master/src/web/public/favicon.png"
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
