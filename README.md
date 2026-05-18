@@ -70,8 +70,6 @@ If you have Docker installed on your machine or server:
 
 ### Option B — Unraid
 
-> **Note:** Use **Host** network mode — bridge mode prevents the container from receiving the correct local IP.
-
 1. In the Unraid UI, go to the **Docker** tab and click **Add Container**
 
 2. Fill in the following fields:
@@ -80,7 +78,7 @@ If you have Docker installed on your machine or server:
    |---|---|
    | **Name** | `TwitchcordSchedule` |
    | **Repository** | `ghcr.io/sweevee1/twitchcordschedule:latest` |
-   | **Network Type** | `Host` |
+   | **Network Type** | `Bridge` |
 
 3. Click **Add another Path, Port, Variable, Label or Device** to add a volume:
 
