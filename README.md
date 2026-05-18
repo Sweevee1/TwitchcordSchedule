@@ -86,25 +86,26 @@ If you have Docker installed on your machine or server:
    |---|---|---|---|
    | Path | `Data` | `/app/data` | `/mnt/user/appdata/twitchcordschedule` |
 
-4. Add a port mapping so the dashboard is reachable from your network (click **Add another Path...** → Port):
-
-   | Type | Name | Container Port | Host Port |
-   |---|---|---|---|
-   | Port | `WebUI` | `3000` | `3000` |
-
-   > You can change the host port to anything you like (e.g. `3006`) if port 3000 is already in use. If you do, also add a Variable with Name `PORT` and Value matching the host port so the app listens on the right port inside the container.
-
-5. Add the following environment variables (click **Add another Path...** → Variable for each):
+4. Add the following environment variables (click **Add another Path...** → Variable for each):
 
    | Name | Value |
    |---|---|
    | `TWITCH_CLIENT_ID` | your Client ID from Step 1 |
    | `TWITCH_CLIENT_SECRET` | your Client Secret from Step 1 |
    | `DISCORD_BOT_TOKEN` | your Bot Token from Step 2 |
+   | `PORT` | `3000` (or any free port on your server) |
+
+5. Add a port mapping so the dashboard is reachable from your network (click **Add another Path...** → Port):
+
+   | Type | Name | Container Port | Host Port |
+   |---|---|---|---|
+   | Port | `WebUI` | *(same as your PORT value)* | *(same as your PORT value)* |
+
+   > Both ports must match your `PORT` variable — the container port is what the app listens on inside Docker, and the host port is how you reach it from your network.
 
 6. Click **Apply** — Unraid will pull the image and start the container
 
-7. Open the dashboard at `http://YOUR-UNRAID-IP:3000` (replace `3000` with whatever host port you chose)
+7. Open the dashboard at `http://YOUR-UNRAID-IP:PORT`
 
 ---
 
