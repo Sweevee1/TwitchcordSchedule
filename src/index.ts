@@ -44,9 +44,12 @@ async function main() {
   });
 
   discordClient.on('guildCreate', guild => {
+    const isNew = !db.getAllGuilds().some(g => g.guild_id === guild.id);
     db.upsertGuild(guild.id, guild.name, guild.iconURL({ size: 64 }));
-    db.linkGuildToAllChannels(guild.id);
-    logger.info('discord', `Bot joined new guild: ${guild.name} (${guild.id})`);
+    if (isNew) {
+      db.linkGuildToAllChannels(guild.id);
+      logger.info('discord', `Bot joined new guild: ${guild.name} (${guild.id})`);
+    }
   });
 
   discordClient.on('guildDelete', guild => {
